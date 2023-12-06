@@ -214,8 +214,27 @@ h2{
     cursor: pointer;
 }
 .informacion button:hover{
-    background-color: rgb(214, 208, 179)}
+    background-color: rgb(214, 208, 179)
+}
+
 
 footer{
+    background-color: rgb(105, 85, 43);
+    color: white;
     text-align: center;
+    font-size: 15px;
+    padding: 10px;
+}
+
+
+.redes a{
+    font-size: 50px;
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+}
+
+.redes a i{
+    letter-spacing: 30px;
+    font-size: 45px;
+    color: wheat;
 }
