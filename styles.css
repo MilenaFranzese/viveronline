@@ -112,6 +112,14 @@ h2{
     padding: 5px;
 }
 
+.fa-trash-can {
+    cursor: pointer;
+    color: #000000;
+    margin-left: 8px;
+    margin-top: 2px;
+    font-size: medium;
+}
+
 #listaCarrito li {
     display: flex;
     justify-content: space-between;

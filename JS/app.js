@@ -49,12 +49,26 @@ function agregarAlCarrito(nombreProducto, precioProducto) {
         <span class="cantidad">1</span> 
         ${nombreProducto} - 
         Subtotal: <span class="subtotal">$${precioProducto.toFixed(2)}</span>
+        <i class="fa-solid fa-trash-can" onclick="eliminarProducto('${nombreProducto}')"></i>
     `;
     listaCarrito.appendChild(nuevoProducto);
     calcularTotal();
     actualizarContadorCarrito();
 }
 
+function eliminarProducto(nombreProducto) {
+    const productosEnCarrito = listaCarrito.children;
+
+    for (let i = 0; i < productosEnCarrito.length; i++) {
+        const producto = productosEnCarrito[i];
+        if (producto.dataset.nombre === nombreProducto) {
+            producto.remove();
+            calcularTotal();
+            actualizarContadorCarrito();
+            return;
+        }
+    }
+}
 
 function limpiarCarrito() {
     listaCarrito.innerHTML = "";
