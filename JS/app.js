@@ -73,10 +73,28 @@ function eliminarProducto(nombreProducto) {
 }
 
 function limpiarCarrito() {
-    listaCarrito.innerHTML = "";
-    totalCarrito.textContent = "$0.00";
-    actualizarContadorCarrito();
-    guardarCarritoEnLocalStorage();
+    Swal.fire({
+        title: "¿Estás seguro?",
+        text: "¡No podrás revertir esto!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, vaciar carrito"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            listaCarrito.innerHTML = "";
+            totalCarrito.textContent = "$0.00";
+            actualizarContadorCarrito();
+            guardarCarritoEnLocalStorage();
+
+            Swal.fire({
+                title: "¡Vacío!",
+                text: "Tu carrito ha sido vaciado.",
+                icon: "success"
+            });
+        }
+    });
 }
 
 function calcularTotal() {
