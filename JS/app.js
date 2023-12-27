@@ -1,7 +1,6 @@
 const header = document.querySelector("#header");
 const contenedor = document.querySelector("#contenedor");
 const body = document.querySelector("body");
-
 window.addEventListener("scroll", function () {
     if (contenedor.getBoundingClientRect().top < 10) {
         header.classList.add("scroll");
@@ -39,7 +38,7 @@ function agregarAlCarrito(nombreProducto, precioProducto) {
             producto.querySelector(".subtotal").textContent = `$${(precioProducto * nuevaCantidad).toFixed(2)}`;
             calcularTotal();
             actualizarContadorCarrito();
-            guardarCarritoEnJSON();
+            guardarCarritoEnLocalStorage();
             return;
         }
     }
@@ -55,7 +54,7 @@ function agregarAlCarrito(nombreProducto, precioProducto) {
     listaCarrito.appendChild(nuevoProducto);
     calcularTotal();
     actualizarContadorCarrito();
-    guardarCarritoEnJSON();
+    guardarCarritoEnLocalStorage();
 }
 
 function eliminarProducto(nombreProducto) {
@@ -67,7 +66,7 @@ function eliminarProducto(nombreProducto) {
             producto.remove();
             calcularTotal();
             actualizarContadorCarrito();
-            guardarCarritoEnJSON();
+            guardarCarritoEnLocalStorage();
             return;
         }
     }
@@ -87,11 +86,11 @@ function limpiarCarrito() {
             listaCarrito.innerHTML = "";
             totalCarrito.textContent = "$0.00";
             actualizarContadorCarrito();
-            guardarCarritoEnJSON();
+            guardarCarritoEnLocalStorage();
 
             Swal.fire({
                 title: "¡Vacío!",
-                text: "Tu carrito está vacío.",
+                text: "Tu carrito ha sido vaciado.",
                 icon: "success"
             });
         }
@@ -124,52 +123,23 @@ function actualizarContadorCarrito() {
     cuentaCarrito.textContent = cantidadTotal.toString();
 }
 
-function guardarCarritoEnJSON() {
+function guardarCarritoEnLocalStorage() {
     const productosEnCarrito = [];
-    const productosEnCarritoHTML = listaCarrito.children;
+    const productosEnCarritoHTML = listaCarrito.innerHTML;
 
-    for (let i = 0; i < productosEnCarritoHTML.length; i++) {
-        const producto = productosEnCarritoHTML[i];
-        const nombreProducto = producto.dataset.nombre;
-        const cantidadProducto = parseInt(producto.querySelector(".cantidad").textContent);
-        const subtotalProducto = parseFloat(producto.querySelector(".subtotal").textContent.replace("$", ""));
-
-        productosEnCarrito.push({
-            nombre: nombreProducto,
-            cantidad: cantidadProducto,
-            subtotal: subtotalProducto
-        });
-    }
-
-    const carritoJSON = JSON.stringify(productosEnCarrito);
-    localStorage.setItem("carritoJSON", carritoJSON);
+    localStorage.setItem("carritoHTML", productosEnCarritoHTML);
 }
 
-function recuperarCarritoDesdeJSON() {
-    const carritoJSON = localStorage.getItem("carritoJSON");
-
-    if (carritoJSON) {
-        const productosEnCarrito = JSON.parse(carritoJSON);
-
-        productosEnCarrito.forEach((producto) => {
-            const nuevoProducto = document.createElement("li");
-            nuevoProducto.dataset.nombre = producto.nombre;
-            nuevoProducto.innerHTML = `
-                <span class="cantidad">${producto.cantidad}</span> 
-                ${producto.nombre} - 
-                Subtotal: <span class="subtotal">$${producto.subtotal.toFixed(2)}</span>
-                <i class="fa-solid fa-trash-can" onclick="eliminarProducto('${producto.nombre}')"></i>
-            `;
-
-            listaCarrito.appendChild(nuevoProducto);
-        });
-
-        calcularTotal();
+function recuperarCarritoDesdeLocalStorage() {
+    const productosEnCarritoHTML = localStorage.getItem("carritoHTML");
+    if (productosEnCarritoHTML) {
+        listaCarrito.innerHTML = productosEnCarritoHTML;
         actualizarContadorCarrito();
+        calcularTotal();
     }
 }
 
-recuperarCarritoDesdeJSON();
+recuperarCarritoDesdeLocalStorage();
 
 const botonesComprar = document.querySelectorAll(".card button");
 
