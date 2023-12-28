@@ -74,7 +74,14 @@ function eliminarProducto(nombreProducto) {
     }
 }
 
-function limpiarCarrito() {
+function limpiarCarritoSinConfirmacion() {
+    listaCarrito.innerHTML = "";
+    totalCarrito.textContent = "$0.00";
+    actualizarContadorCarrito();
+    guardarCarritoEnLocalStorage();
+}
+
+function limpiarCarritoConConfirmacion() {
     Swal.fire({
         title: "¿Estás seguro?",
         text: "¡No podrás revertir esto!",
@@ -85,10 +92,7 @@ function limpiarCarrito() {
         confirmButtonText: "Sí, vaciar carrito"
     }).then((result) => {
         if (result.isConfirmed) {
-            listaCarrito.innerHTML = "";
-            totalCarrito.textContent = "$0.00";
-            actualizarContadorCarrito();
-            guardarCarritoEnLocalStorage();
+            limpiarCarritoSinConfirmacion();
 
             Swal.fire({
                 title: "¡Vacío!",
@@ -157,10 +161,19 @@ botonesComprar.forEach((boton) => {
 
 document.querySelector(".boton-comprar").addEventListener("click", async function () {
     console.log("Botón comprar clickeado");
-    
+
+    if (listaCarrito.children.length === 0) {
+        Swal.fire({
+            icon: "info",
+            title: "Carrito vacío",
+            text: "Agrega productos al carrito antes de realizar la compra.",
+        });
+        return;
+    }
+
     try {
         const email = await obtenerEmail();
-        
+
         if (!email) {
             console.log("Email no proporcionado");
             return;
@@ -174,28 +187,32 @@ document.querySelector(".boton-comprar").addEventListener("click", async functio
             title: "¡Compra finalizada!",
             text: `Enviaremos la factura a tu mail (${email}) junto a los datos para que puedas abonar y los medios de retiro o envío.`,
             showConfirmButton: false,
-            timer: 5000
+            timer: 5000,
         });
+
+        limpiarCarritoSinConfirmacion();
     } catch (error) {
         console.error("Error en el proceso de compra:", error);
     }
 });
 
+
+
 async function obtenerEmail() {
     const resultado = await Swal.fire({
-        title: "Submit your email",
+        title: "Ingrese su email",
         input: "email",
         inputAttributes: {
             autocapitalize: "off",
             required: "true"
         },
         showCancelButton: true,
-        confirmButtonText: "Complete purchase",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "Confirmar",
+        cancelButtonText: "Cancelar",
         showLoaderOnConfirm: true,
         preConfirm: async (email) => {
             if (!email) {
-                Swal.showValidationMessage("Email is required");
+                Swal.showValidationMessage("Es necesario ingresar un email para continuar");
             } else {
                 return email;
             }
