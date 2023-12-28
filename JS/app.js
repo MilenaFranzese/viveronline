@@ -1,6 +1,8 @@
+
 const header = document.querySelector("#header");
 const contenedor = document.querySelector("#contenedor");
 const body = document.querySelector("body");
+
 window.addEventListener("scroll", function () {
     if (contenedor.getBoundingClientRect().top < 10) {
         header.classList.add("scroll");
@@ -151,4 +153,85 @@ botonesComprar.forEach((boton) => {
 
         agregarAlCarrito(nombreProducto, precioProducto);
     });
+});
+
+document.querySelector(".boton-comprar").addEventListener("click", async function () {
+    console.log("Botón comprar clickeado");
+    
+    try {
+        const email = await obtenerEmail();
+        
+        if (!email) {
+            console.log("Email no proporcionado");
+            return;
+        }
+
+        console.log("Email proporcionado:", email);
+
+        Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "¡Compra finalizada!",
+            text: `Enviaremos la factura a tu mail (${email}) junto a los datos para que puedas abonar y los medios de retiro o envío.`,
+            showConfirmButton: false,
+            timer: 5000
+        });
+    } catch (error) {
+        console.error("Error en el proceso de compra:", error);
+    }
+});
+
+async function obtenerEmail() {
+    const resultado = await Swal.fire({
+        title: "Submit your email",
+        input: "email",
+        inputAttributes: {
+            autocapitalize: "off",
+            required: "true"
+        },
+        showCancelButton: true,
+        confirmButtonText: "Complete purchase",
+        cancelButtonText: "Cancel",
+        showLoaderOnConfirm: true,
+        preConfirm: async (email) => {
+            if (!email) {
+                Swal.showValidationMessage("Email is required");
+            } else {
+                return email;
+            }
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    });
+
+    if (resultado.isConfirmed) {
+        return resultado.value;
+    }
+
+    return null;
+}
+
+
+const listaComentarios = async () => {
+    try {
+        const respuesta = await fetch("https://jsonplaceholder.typicode.com/comments");
+        const comentarios = await respuesta.json();
+
+        const comentariosLimitados = comentarios.slice(0, 5);
+
+        let tableBody = ``;
+        comentariosLimitados.forEach((comentario, index) => {
+            tableBody += `<tr>
+                <td>${comentario.email}</td>
+                <td>${comentario.body}</td>
+            </tr>`;
+        });
+
+        document.getElementById("tableBody_comentarios").innerHTML = tableBody;
+    } catch (error) {
+        console.error("Error al obtener comentarios:", error);
+    }
+};
+
+window.addEventListener("load", function () {
+    listaComentarios();
 });

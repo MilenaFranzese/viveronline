@@ -225,6 +225,62 @@ h2{
     background-color: rgb(214, 208, 179)
 }
 
+/* Estilos para la tabla */
+table {
+    width: 80%;
+    margin: auto;
+    border-collapse: separate;
+    /* border-spacing: 0 10px; */
+    margin-top: 50px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Estilos para las celdas de la tabla */
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+/* Estilos para la primera fila (encabezado) */
+th {
+    background-color: #6d583d;
+    color: white;
+    border-top-left-radius: 15px; /* Redondear esquina superior izquierda */
+    border-top-right-radius: 15px; /* Redondear esquina superior derecha */
+}
+
+/* Estilos para la última fila (último comentario) */
+tr:last-child td {
+    border-bottom: none; /* Elimina la línea separadora del último comentario */
+}
+
+/* Estilos para las celdas del encabezado */
+thead th {
+    background-color: #6d583d;
+    color: white;
+    padding: 10px;
+    text-align: left;
+}
+
+/* Estilos para las celdas de datos */
+tbody td {
+    padding: 10px;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #d2c4a2;
+}
+
+/* Estilos para las celdas al pasar el mouse sobre ellas (opcional) */
+tbody tr:hover td {
+    background-color: #a89777;
+    color: white;
+}
+
+tbody tr {
+    border-bottom: 1px solid #6d583d; /* Línea fina entre filas */
+}
 
 footer{
     background-color: rgb(105, 85, 43);
@@ -232,6 +288,7 @@ footer{
     text-align: center;
     font-size: 15px;
     padding: 10px;
+    margin-top: 50px;
 }
 
 
