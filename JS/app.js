@@ -1,4 +1,3 @@
-
 const header = document.querySelector("#header");
 const contenedor = document.querySelector("#contenedor");
 const body = document.querySelector("body");
@@ -17,6 +16,8 @@ const listaCarrito = document.getElementById("listaCarrito");
 const totalCarrito = document.getElementById("totalCarrito");
 const cuentaCarrito = document.getElementById("cuentacarrito");
 
+const carrito = [];
+
 abrirCarrito.addEventListener("click", abrirModal);
 
 function abrirModal() {
@@ -29,55 +30,38 @@ function cerrarModal() {
 }
 
 function agregarAlCarrito(nombreProducto, precioProducto) {
-    const productosEnCarrito = listaCarrito.children;
+    const productoEnCarrito = carrito.find(producto => producto.nombre === nombreProducto);
 
-    for (let i = 0; i < productosEnCarrito.length; i++) {
-        const producto = productosEnCarrito[i];
-        if (producto.dataset.nombre === nombreProducto) {
-            const cantidadActual = parseInt(producto.querySelector(".cantidad").textContent);
-            const nuevaCantidad = cantidadActual + 1;
-            producto.querySelector(".cantidad").textContent = nuevaCantidad;
-            producto.querySelector(".subtotal").textContent = `$${(precioProducto * nuevaCantidad).toFixed(2)}`;
-            calcularTotal();
-            actualizarContadorCarrito();
-            guardarCarritoEnLocalStorage();
-            return;
-        }
+    if (productoEnCarrito) {
+        productoEnCarrito.cantidad++;
+        productoEnCarrito.subtotal = productoEnCarrito.cantidad * precioProducto;
+    } else {
+        carrito.push({
+            nombre: nombreProducto,
+            precio: precioProducto,
+            cantidad: 1,
+            subtotal: precioProducto
+        });
     }
 
-    const nuevoProducto = document.createElement("li");
-    nuevoProducto.dataset.nombre = nombreProducto;
-    nuevoProducto.innerHTML = `
-        <span class="cantidad">1</span> 
-        ${nombreProducto} - 
-        Subtotal: <span class="subtotal">$${precioProducto.toFixed(2)}</span>
-        <i class="fa-solid fa-trash-can" onclick="eliminarProducto('${nombreProducto}')"></i>
-    `;
-    listaCarrito.appendChild(nuevoProducto);
-    calcularTotal();
-    actualizarContadorCarrito();
+    actualizarCarritoDOM();
     guardarCarritoEnLocalStorage();
 }
 
 function eliminarProducto(nombreProducto) {
-    const productosEnCarrito = listaCarrito.children;
+    const indiceProducto = carrito.findIndex(producto => producto.nombre === nombreProducto);
 
-    for (let i = 0; i < productosEnCarrito.length; i++) {
-        const producto = productosEnCarrito[i];
-        if (producto.dataset.nombre === nombreProducto) {
-            producto.remove();
-            calcularTotal();
-            actualizarContadorCarrito();
-            guardarCarritoEnLocalStorage();
-            return;
-        }
+    if (indiceProducto !== -1) {
+        carrito.splice(indiceProducto, 1);
     }
+
+    actualizarCarritoDOM();
+    guardarCarritoEnLocalStorage();
 }
 
 function limpiarCarritoSinConfirmacion() {
-    listaCarrito.innerHTML = "";
-    totalCarrito.textContent = "$0.00";
-    actualizarContadorCarrito();
+    carrito.length = 0; 
+    actualizarCarritoDOM();
     guardarCarritoEnLocalStorage();
 }
 
@@ -105,42 +89,59 @@ function limpiarCarritoConConfirmacion() {
 
 function calcularTotal() {
     let total = 0;
-    const productosEnCarrito = listaCarrito.children;
 
-    for (let i = 0; i < productosEnCarrito.length; i++) {
-        const producto = productosEnCarrito[i];
-        const precioProducto = parseFloat(producto.querySelector(".subtotal").textContent.replace("$", ""));
-        total += precioProducto;
+    for (const producto of carrito) {
+        total += producto.subtotal;
     }
 
     totalCarrito.textContent = `$${total.toFixed(2)}`;
 }
 
+function actualizarCarritoDOM() {
+    listaCarrito.innerHTML = "";
+
+    for (const producto of carrito) {
+        const nuevoProducto = document.createElement("li");
+        nuevoProducto.innerHTML = `
+            <span class="cantidad">${producto.cantidad}</span> 
+            ${producto.nombre} - 
+            Subtotal: <span class="subtotal">$${producto.subtotal.toFixed(2)}</span>
+            <i class="fa-solid fa-trash-can" onclick="eliminarProducto('${producto.nombre}')"></i>
+        `;
+        listaCarrito.appendChild(nuevoProducto);
+    }
+
+    if (carrito.length === 0) {
+        totalCarrito.textContent = "$0.00";
+    } else {
+        calcularTotal();
+    }
+
+    actualizarContadorCarrito();
+}
+
 function actualizarContadorCarrito() {
-    const productosEnCarrito = listaCarrito.children;
     let cantidadTotal = 0;
 
-    for (let i = 0; i < productosEnCarrito.length; i++) {
-        const producto = productosEnCarrito[i];
-        const cantidadProducto = parseInt(producto.querySelector(".cantidad").textContent);
-        cantidadTotal += cantidadProducto;
+    for (const producto of carrito) {
+        cantidadTotal += producto.cantidad;
     }
 
     cuentaCarrito.textContent = cantidadTotal.toString();
 }
 
 function guardarCarritoEnLocalStorage() {
-    const productosEnCarrito = [];
-    const productosEnCarritoHTML = listaCarrito.innerHTML;
-
-    localStorage.setItem("carritoHTML", productosEnCarritoHTML);
+    localStorage.setItem("carrito", JSON.stringify(carrito));
 }
 
 function recuperarCarritoDesdeLocalStorage() {
-    const productosEnCarritoHTML = localStorage.getItem("carritoHTML");
-    if (productosEnCarritoHTML) {
-        listaCarrito.innerHTML = productosEnCarritoHTML;
-        actualizarContadorCarrito();
+    const carritoGuardado = localStorage.getItem("carrito");
+
+    if (carritoGuardado) {
+        carrito.length = 0;
+        const carritoParseado = JSON.parse(carritoGuardado);
+        carrito.push(...carritoParseado);
+        actualizarCarritoDOM();
         calcularTotal();
     }
 }
@@ -162,7 +163,7 @@ botonesComprar.forEach((boton) => {
 document.querySelector(".boton-comprar").addEventListener("click", async function () {
     console.log("Botón comprar clickeado");
 
-    if (listaCarrito.children.length === 0) {
+    if (carrito.length === 0) {
         Swal.fire({
             icon: "info",
             title: "Carrito vacío",
@@ -185,7 +186,7 @@ document.querySelector(".boton-comprar").addEventListener("click", async functio
             position: "top-end",
             icon: "success",
             title: "¡Compra finalizada!",
-            text: `Enviaremos la factura a tu mail (${email}) junto a los datos para que puedas abonar y los medios de retiro o envío.`,
+            text: `Enviaremos la factura a tu mail (${email}) junto a los datos para que puedas abonar y las formas de envío o retiro.`,
             showConfirmButton: false,
             timer: 5000,
         });
@@ -195,8 +196,6 @@ document.querySelector(".boton-comprar").addEventListener("click", async functio
         console.error("Error en el proceso de compra:", error);
     }
 });
-
-
 
 async function obtenerEmail() {
     const resultado = await Swal.fire({
@@ -226,7 +225,6 @@ async function obtenerEmail() {
 
     return null;
 }
-
 
 const listaComentarios = async () => {
     try {
